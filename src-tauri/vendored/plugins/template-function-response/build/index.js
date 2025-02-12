@@ -8825,7 +8825,8 @@ var behaviorArg = {
   defaultValue: "smart",
   options: [
     { label: "When no responses", value: "smart" },
-    { label: "Always", value: "always" }
+    { label: "Always", value: "always" },
+    { label: "30 Minutes", value: "min30" }
   ]
 };
 var requestArg = {
@@ -8966,8 +8967,9 @@ async function getResponse(ctx, { requestId, behavior, purpose }) {
     return null;
   }
   let response = responses[0] ?? null;
+
   let finalBehavior = behavior === "always" && purpose === "preview" ? "smart" : behavior;
-  if (finalBehavior === "smart" && response == null || finalBehavior === "always") {
+  if (finalBehavior === "smart" && response == null || finalBehavior === "always" || (finalBehavior === "min30" && response == null || +new Date() - +new Date(response?.updatedAt + 'Z') > 180000)) {
     const renderedHttpRequest = await ctx.httpRequest.render({ httpRequest, purpose });
     response = await ctx.httpRequest.send({ httpRequest: renderedHttpRequest });
   }
